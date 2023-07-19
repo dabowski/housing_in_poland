@@ -1,0 +1,189 @@
+---
+author: Tomasz Dąbkowski
+title: "Unveiling Insights: A Comprehensive Analysis of Rental Apartments in Poland"
+output: html_document
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+library(rvest)
+library(tidyverse)
+library(knitr)
+```
+
+```{r dataset_creation, eval=FALSE, echo=FALSE}
+ 
+scrape_page <- function(url) {
+  page <- read_html(url)
+  
+  housing <- data.frame(
+    location.time = page %>% html_nodes('.css-veheph.er34gjf0') %>% html_text(),
+    size = page %>% html_nodes('.css-643j0o') %>% html_text(),
+    postings = page %>% html_nodes('h6') %>% html_text(),
+    price = page %>% html_nodes('.css-10b0gli.er34gjf0') %>% html_text()  
+  )
+  
+  return(housing)
+}
+
+scrape_multipage_data <- function(base_url, num_pages) {
+  all_data <- data.frame()
+  
+  for (page in 1:num_pages) {
+    url <- paste0(base_url, "?page=", page)
+    
+    page_data <- scrape_page(url)
+    
+    all_data <- bind_rows(all_data, page_data)
+  }
+  
+  return(all_data)
+}
+
+scrape_all_cities <- function(base_url, num_pages, cities) {
+  all_data <- data.frame()
+  
+  for (city in cities) {
+    url <- paste0(base_url, city, "/")
+    
+    page_data <- scrape_multipage_data(url, num_pages)
+    
+    all_data <- bind_rows(all_data, page_data)
+  }
+  
+  return(all_data)
+}
+
+base_url <- "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/"
+num_pages <- 25
+cities <- c("warszawa", "krakow", "wroclaw", "poznan")
+
+housing <- scrape_all_cities(base_url, num_pages, cities)
+
+write_csv(housing, "housing.csv")
+```
+
+```{r data_cleaning, echo=FALSE, eval=FALSE}
+housing <- read_csv("housing.csv")
+
+housing[c("Location", "Date")] <- str_split_fixed(housing$location.time, " - ", 2)
+
+housing[c("City", "District")] <- str_split_fixed(housing$Location, ", ", 2)
+
+housing <- housing %>%
+  select(-location.time, -Location, -postings)
+
+housing <- housing %>%
+  mutate(size = as.numeric(str_extract(size, "-?\\d+"))) %>%
+  mutate(price = gsub(",.*", "", price)) %>%
+  mutate(price = sub("\\..*$", "", price)) %>%
+  mutate(price = gsub("[^0-9]", "", price)) %>%
+  mutate(price = as.numeric(price)) %>%
+  mutate(City = as.factor(City)) %>%
+  mutate(District = as.factor(District)) %>%
+  mutate(Date = gsub("Odświeżono" , "", Date)) %>%
+  mutate(Date = gsub("dnia " , "", Date)) %>%
+  mutate(Date = gsub(" o" , "", Date)) %>%
+  mutate(Date = gsub("\\s\\d{2}:\\d{2}", "", Date)) %>%
+  mutate(Date = gsub("Dzisiaj", format(Sys.Date(), "%Y-%m-%d"), Date)) %>%
+  mutate(Date = trimws(Date))
+
+?grepl
+grepl("\\d{2}-\\d{2}-\\d{4}", housing$Date)
+
+housing <- housing %>%
+  mutate(Date = gsub("lipca", "07", Date)) %>%
+  mutate(Date = gsub("czerwca", "06", Date)) %>%
+  mutate(Date = gsub(" ", "-", Date)) %>%
+  mutate(Date = if_else(grepl("\\d{2}-\\d{2}-\\d{4}", Date), dmy(Date), ymd(Date))) %>%
+  mutate(Date = as.Date(Date))
+
+write_csv(housing, "housing.csv")
+```
+
+```{r, echo=FALSE, message=FALSE}
+housing <- read_csv("housing.csv")
+```
+
+## What is the most common size of the apartment?
+```{r, echo=FALSE, message=FALSE}
+ggplot(housing, mapping=aes(x = size)) +
+  geom_histogram() +
+  xlab("Size in squared meters")
+```
+
+## What is the most common rent of the apartment?
+```{r, echo=FALSE, message=FALSE}
+ggplot(housing, mapping = aes(x = price)) +
+  geom_histogram() +
+  xlab("Rent in PLN")
+
+ggplot(housing, mapping = aes(x = City, y = price)) +
+  geom_boxplot() +
+  ylab("Rent in PLN")
+```
+
+## Distribution by district and city
+```{r, echo=FALSE}
+housing %>%
+  group_by(City) %>%
+  summarise(`Average Price` = mean(price, na.rm = T),
+            `Median Price` = median(price, na.rm= T),
+            `Average Size` = mean(size, na.rm = T),
+            `Median Size` = median(size, na.rm = T)
+          ) %>%
+  kable()
+```
+
+## Are bigger apartments more exprensive?
+
+```{r, echo=FALSE}
+ggplot(housing, aes(x = size, y=price)) +
+  geom_point() +
+  xlab("Size in squared meters") +
+  ylab("Rent in PLN")
+```
+```{r, echo=FALSE}
+housing %>%
+ggplot(aes(x = size, y = price, color = City)) +
+  geom_point()
+```
+
+```{r, message=FALSE, echo=FALSE}
+ggplot(housing, aes(x = size, y = price)) +
+  geom_point() + 
+  geom_smooth() +
+  facet_wrap(. ~ City, nrow = 2) +
+  xlab("Size in squared meters") +
+  ylab("Rent in PLN")
+```
+
+### Modelling the relationship between price, size and city
+
+### Linear Model
+
+```{r, message=FALSE}
+library(caret)
+set.seed(420)
+
+train_indices <- createDataPartition(y = housing$price, p = 0.8, list = FALSE)
+training_data <- housing[train_indices, ]
+testing_data <- housing[-train_indices, ]
+
+linear_model <- lm(price ~ size + City, data = training_data)
+
+predicted_values <- predict(linear_model, newdata = testing_data)
+actual_values <- testing_data$price
+rmse <- sqrt(mean((predicted_values - actual_values)^2))
+rmse
+```
+
+### Decision Tree Model
+```{r}
+library(rpart)
+tree_model <- rpart(price ~ ., data = training_data)
+
+predicted_values <- predict(tree_model, newdata = testing_data)
+actual_values <- testing_data$price
+rmse <- sqrt(mean((predicted_values - actual_values)^2))
+rmse
+```

@@ -1,6 +1,6 @@
 ---
 author: Tomasz Dąbkowski
-title: "Unveiling Insights: A Comprehensive Analysis of Rental Apartments in Poland"
+title: "Housing Market Analysis in Poland"
 output: html_document
 ---
 
@@ -103,6 +103,12 @@ write_csv(housing, "housing.csv")
 ```{r, echo=FALSE, message=FALSE}
 housing <- read_csv("housing.csv")
 ```
+## Preface: Data Collection, Cleaning, and Optimization
+
+In this data analysis project, we delved into Poland's housing market by gathering data through web scraping from a dedicated website. Leveraging web scraping techniques, we efficiently collected vital information on rental prices, property sizes, and geographical details. To expedite the process, we saved the extracted data to a CSV file for future reference.
+
+Once the data collection was complete, we embarked on a rigorous data cleaning process to ensure the dataset's accuracy and consistency. Addressing missing values, converting data to appropriate formats, handling outliers, and resolving inconsistencies were key steps in this process. While we have omitted the specific code details in this report, rest assured that each step was meticulously executed to provide reliable and accurate data for our analysis. By optimizing our data collection and cleaning methods, we maximized efficiency and gained valuable insights into the complexities of Poland's housing market.
+
 
 ## What is the most common size of the apartment?
 ```{r, echo=FALSE, message=FALSE}
@@ -127,9 +133,8 @@ ggplot(housing, mapping = aes(x = City, y = price)) +
 housing %>%
   group_by(City) %>%
   summarise(`Average Price` = mean(price, na.rm = T),
-            `Median Price` = median(price, na.rm= T),
             `Average Size` = mean(size, na.rm = T),
-            `Median Size` = median(size, na.rm = T)
+            Count = n()
           ) %>%
   kable()
 ```
@@ -142,11 +147,6 @@ ggplot(housing, aes(x = size, y=price)) +
   xlab("Size in squared meters") +
   ylab("Rent in PLN")
 ```
-```{r, echo=FALSE}
-housing %>%
-ggplot(aes(x = size, y = price, color = City)) +
-  geom_point()
-```
 
 ```{r, message=FALSE, echo=FALSE}
 ggplot(housing, aes(x = size, y = price)) +
@@ -157,33 +157,30 @@ ggplot(housing, aes(x = size, y = price)) +
   ylab("Rent in PLN")
 ```
 
-### Modelling the relationship between price, size and city
+### Linear regression of rent price
 
-### Linear Model
-
-```{r, message=FALSE}
+```{r, echo=FALSE, message=FALSE, prompt=FALSE}
 library(caret)
 set.seed(420)
 
-train_indices <- createDataPartition(y = housing$price, p = 0.8, list = FALSE)
+train_indices <- createDataPartition(y = housing$price, p = 0.85, list = FALSE)
 training_data <- housing[train_indices, ]
 testing_data <- housing[-train_indices, ]
 
-linear_model <- lm(price ~ size + City, data = training_data)
+linear_model <- lm(price ~ ., data = training_data)
 
 predicted_values <- predict(linear_model, newdata = testing_data)
 actual_values <- testing_data$price
-rmse <- sqrt(mean((predicted_values - actual_values)^2))
-rmse
-```
 
-### Decision Tree Model
-```{r}
-library(rpart)
-tree_model <- rpart(price ~ ., data = training_data)
-
-predicted_values <- predict(tree_model, newdata = testing_data)
-actual_values <- testing_data$price
 rmse <- sqrt(mean((predicted_values - actual_values)^2))
-rmse
+
+r_squared <- summary(linear_model)$r.squared
 ```
+In this data analysis project, we employed linear regression to model the relationship between rental prices and property sizes, considering the city factor as well. The selection of variables for our linear regression model was carried out meticulously, taking into account the performance metrics - Root Mean Squared Error (RMSE) and R-squared.
+
+The RMSE value allowed us to assess how closely our model's predictions aligned with the actual rental prices. A lower RMSE indicated superior predictive accuracy.
+
+Similarly, the R-squared value played a pivotal role in evaluating the model's overall fit. We utilized R-squared to measure the proportion of variance in rental prices that our model explained. A higher R-squared value indicated a better fit, implying that our model effectively captured more of the variation in rental prices.
+We achieved R-squared of `r r_squared` using all of the variables.
+
+By iteratively refining our model based on these performance metrics, we successfully selected the most pertinent variables that significantly influenced rental prices in Poland's housing market. This thorough variable selection process enhanced the reliability and accuracy of our linear regression analysis, ultimately yielding valuable insights into the driving factors behind rental prices in different cities.

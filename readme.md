@@ -24,4 +24,4 @@ The data was obtained through web scraping from *olx.pl*, which provided valuabl
 ## Conclusion
 My project successfully explored the housing market in Poland, providing valuable insights into the rental prices, property sizes, and their variations across different cities and districts. The linear regression model shed light on the relationship between rent, property size, and location, allowing for more informed decision-making in the housing market.
 
-For a detailed analysis and visualizations, please refer to the full HTML report available here.
+For a detailed analysis and visualizations, please refer to the full HTML report available [here](https://dabowski.github.io/housing_analysis).

@@ -5,12 +5,12 @@ output: html_document
 ---
 
 ```{r setup, echo=FALSE, message=FALSE}
-library(rvest)
 library(tidyverse)
 library(knitr)
 ```
 
 ```{r dataset_creation, eval=FALSE, echo=FALSE}
+library(rvest)
  
 scrape_page <- function(url) {
   page <- read_html(url)

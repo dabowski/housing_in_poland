@@ -4,7 +4,7 @@
 My project focuses on analyzing the housing market in Poland using data collected from web scraping. The primary goal was to investigate the relationship between rental prices, property sizes, and various cities and districts within the country. The analysis was conducted in the R environment, utilizing a range of packages such as tidyverse, caret, and rmarkdown.
 
 ## Data Collection
-The data was obtained through web scraping from *olx.pl*, which provided valuable information on rental properties in Poland. After extracting the data, it was formatted and cleaned to prepare it for further analysis. The variables recorded were City, District, rental price, and property size.
+The data was obtained through web scraping from dedicated website, which provided valuable information on rental properties in Poland. After extracting the data, it was formatted and cleaned to prepare it for further analysis. The variables recorded were City, District, rental price, and property size.
 
 ## Data Analysis
 1. Descriptive Analysis

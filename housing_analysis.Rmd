@@ -105,10 +105,9 @@ housing <- read_csv("housing.csv")
 ```
 ## Preface: Data Collection, Cleaning, and Optimization
 
-In this data analysis project, we delved into Poland's housing market by gathering data through web scraping from a dedicated website. Leveraging web scraping techniques, we efficiently collected vital information on rental prices, property sizes, and geographical details. To expedite the process, we saved the extracted data to a CSV file for future reference.
+In this data analysis project, I delved into Poland's housing market by gathering data through web scraping from a dedicated website. Leveraging web scraping techniques, I efficiently collected vital information on rental prices, property sizes, and geographical details. To expedite the process, I saved the extracted data to a CSV file for future reference.
 
-Once the data collection was complete, we embarked on a rigorous data cleaning process to ensure the dataset's accuracy and consistency. Addressing missing values, converting data to appropriate formats, handling outliers, and resolving inconsistencies were key steps in this process. While we have omitted the specific code details in this report, rest assured that each step was meticulously executed to provide reliable and accurate data for our analysis. By optimizing our data collection and cleaning methods, we maximized efficiency and gained valuable insights into the complexities of Poland's housing market.
-
+Once the data collection was complete, I embarked on a rigorous data cleaning process to ensure the dataset's accuracy and consistency. Addressing missing values, converting data to appropriate formats, handling outliers, and resolving inconsistencies were key steps in this process. While I have omitted the specific code details in this report, rest assured that each step was meticulously executed to provide reliable and accurate data for my analysis. By optimizing my data collection and cleaning methods, I maximized efficiency and gained valuable insights into the complexities of Poland's housing market.
 
 ## What is the most common size of the apartment?
 ```{r, echo=FALSE, message=FALSE}
@@ -176,11 +175,11 @@ rmse <- sqrt(mean((predicted_values - actual_values)^2))
 
 r_squared <- summary(linear_model)$r.squared
 ```
-In this data analysis project, we employed linear regression to model the relationship between rental prices and property sizes, considering the city factor as well. The selection of variables for our linear regression model was carried out meticulously, taking into account the performance metrics - Root Mean Squared Error (RMSE) and R-squared.
+In this data analysis project, I employed linear regression to model the relationship between rental prices and property sizes, considering the city factor as well. The selection of variables for my linear regression model was carried out meticulously, taking into account the performance metrics - Root Mean Squared Error (RMSE) and R-squared.
 
-The RMSE value allowed us to assess how closely our model's predictions aligned with the actual rental prices. A lower RMSE indicated superior predictive accuracy.
+The RMSE value allowed me to assess how closely my model's predictions aligned with the actual rental prices. A lower RMSE indicated superior predictive accuracy.
 
-Similarly, the R-squared value played a pivotal role in evaluating the model's overall fit. We utilized R-squared to measure the proportion of variance in rental prices that our model explained. A higher R-squared value indicated a better fit, implying that our model effectively captured more of the variation in rental prices.
-We achieved R-squared of `r r_squared` using all of the variables.
+Similarly, the R-squared value played a pivotal role in evaluating the model's overall fit. I utilized R-squared to measure the proportion of variance in rental prices that my model explained. A higher R-squared value indicated a better fit, implying that my model effectively captured more of the variation in rental prices.
+I achieved an R-squared of `r r_squared` using all of the variables.
 
-By iteratively refining our model based on these performance metrics, we successfully selected the most pertinent variables that significantly influenced rental prices in Poland's housing market. This thorough variable selection process enhanced the reliability and accuracy of our linear regression analysis, ultimately yielding valuable insights into the driving factors behind rental prices in different cities.
+By iteratively refining my model based on these performance metrics, I successfully selected the most pertinent variables that significantly influenced rental prices in Poland's housing market. This thorough variable selection process enhanced the reliability and accuracy of my linear regression analysis, ultimately yielding valuable insights into the driving factors behind rental prices in different cities.
